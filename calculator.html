@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+        }
+        .calculator-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .keypad-container {
+            transition: all 0.3s ease-in-out;
+            transform-origin: top;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+        .alpha-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+        .calc-button {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            font-size: 1.25rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .calc-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px -1px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        .calc-button.operator {
+            background-color: #e53e3e;
+        }
+        .calc-button.clear {
+            background-color: #f6ad55;
+        }
+        .calc-button.equals {
+            background-color: #48bb78;
+            grid-column: span 2;
+        }
+        .calc-button.function {
+            background-color: #4299e1;
+        }
+        .calc-button.mode-toggle {
+            background-color: #a0aec0;
+            color: #2d3748;
+        }
+        .wikipedia-container {
+            background-color: #2d3748;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            height: 100%;
+            overflow-y: auto;
+        }
+        @media (min-width: 768px) {
+            .calculator-container {
+                grid-template-columns: 1.5fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen flex items-center justify-center p-4">
+
+    <div class="calculator-container max-w-7xl mx-auto rounded-xl p-6 bg-gray-800 shadow-2xl">
+        <!-- Calculator Section -->
+        <div class="p-4 flex flex-col space-y-4">
+            <div class="bg-gray-700 p-4 rounded-xl shadow-inner mb-4">
+                <div id="display" class="text-3xl text-right overflow-hidden whitespace-nowrap">0</div>
+            </div>
+
+            <div class="keypad-container">
+                <!-- Numerical Keypad (Visible by default) -->
+                <div id="number-keypad" class="calculator-grid">
+                    <!-- Row 1 -->
+                    <button class="calc-button clear" onclick="clearDisplay()">C</button>
+                    <button class="calc-button function" onclick="backspace()">&#x232B;</button>
+                    <button class="calc-button function" onclick="appendToDisplay('Math.pow(')">x<sup>y</sup></button>
+                    <button class="calc-button operator" onclick="appendToDisplay('/')">/</button>
+                    <!-- Row 2 -->
+                    <button class="calc-button" onclick="appendToDisplay('7')">7</button>
+                    <button class="calc-button" onclick="appendToDisplay('8')">8</button>
+                    <button class="calc-button" onclick="appendToDisplay('9')">9</button>
+                    <button class="calc-button operator" onclick="appendToDisplay('*')">×</button>
+                    <!-- Row 3 -->
+                    <button class="calc-button" onclick="appendToDisplay('4')">4</button>
+                    <button class="calc-button" onclick="appendToDisplay('5')">5</button>
+                    <button class="calc-button" onclick="appendToDisplay('6')">6</button>
+                    <button class="calc-button operator" onclick="appendToDisplay('-')">-</button>
+                    <!-- Row 4 -->
+                    <button class="calc-button" onclick="appendToDisplay('1')">1</button>
+                    <button class="calc-button" onclick="appendToDisplay('2')">2</button>
+                    <button class="calc-button" onclick="appendToDisplay('3')">3</button>
+                    <button class="calc-button operator" onclick="appendToDisplay('+')">+</button>
+                    <!-- Row 5 -->
+                    <button class="calc-button" onclick="appendToDisplay('0')">0</button>
+                    <button class="calc-button" onclick="appendToDisplay('.')">.</button>
+                    <button class="calc-button mode-toggle" onclick="toggleMode()">ABC</button>
+                    <button class="calc-button equals" onclick="calculate()">=</button>
+    
+                    <!-- Scientific Functions -->
+                    <button class="calc-button function" onclick="appendToDisplay('Math.sin(')">sin</button>
+                    <button class="calc-button function" onclick="appendToDisplay('Math.cos(')">cos</button>
+                    <button class="calc-button function" onclick="appendToDisplay('Math.tan(')">tan</button>
+                    <button class="calc-button function" onclick="appendToDisplay('Math.log10(')">log</button>
+                    <button class="calc-button function" onclick="appendToDisplay('Math.PI')">π</button>
+                    <button class="calc-button function" onclick="appendToDisplay('Math.E')">e</button>
+                    <button class="calc-button function" onclick="appendToDisplay('(')">(</button>
+                    <button class="calc-button function" onclick="appendToDisplay(')')">)</button>
+                </div>
+    
+                <!-- Alphabet Keypad (Hidden by default) -->
+                <div id="alpha-keypad" class="alpha-grid hidden">
+                    <button class="calc-button" onclick="appendToDisplay('q')">q</button>
+                    <button class="calc-button" onclick="appendToDisplay('w')">w</button>
+                    <button class="calc-button" onclick="appendToDisplay('e')">e</button>
+                    <button class="calc-button" onclick="appendToDisplay('r')">r</button>
+                    <button class="calc-button" onclick="appendToDisplay('t')">t</button>
+                    <button class="calc-button" onclick="appendToDisplay('y')">y</button>
+                    <button class="calc-button" onclick="appendToDisplay('u')">u</button>
+                    <button class="calc-button" onclick="appendToDisplay('i')">i</button>
+                    <button class="calc-button" onclick="appendToDisplay('o')">o</button>
+                    <button class="calc-button" onclick="appendToDisplay('p')">p</button>
+                    <button class="calc-button" onclick="appendToDisplay('a')">a</button>
+                    <button class="calc-button" onclick="appendToDisplay('s')">s</button>
+                    <button class="calc-button" onclick="appendToDisplay('d')">d</button>
+                    <button class="calc-button" onclick="appendToDisplay('f')">f</button>
+                    <button class="calc-button" onclick="appendToDisplay('g')">g</button>
+                    <button class="calc-button" onclick="appendToDisplay('h')">h</button>
+                    <button class="calc-button" onclick="appendToDisplay('j')">j</button>
+                    <button class="calc-button" onclick="appendToDisplay('k')">k</button>
+                    <button class="calc-button" onclick="appendToDisplay('l')">l</button>
+                    <button class="calc-button" onclick="appendToDisplay('z')">z</button>
+                    <button class="calc-button" onclick="appendToDisplay('x')">x</button>
+                    <button class="calc-button" onclick="appendToDisplay('c')">c</button>
+                    <button class="calc-button" onclick="appendToDisplay('v')">v</button>
+                    <button class="calc-button" onclick="appendToDisplay('b')">b</button>
+                    <button class="calc-button" onclick="appendToDisplay('n')">n</button>
+                    <button class="calc-button" onclick="appendToDisplay('m')">m</button>
+                    <button class="calc-button clear" onclick="clearDisplay()">C</button>
+                    <button class="calc-button function" onclick="backspace()">&#x232B;</button>
+                    <button class="calc-button function" onclick="appendToDisplay(' ')">Space</button>
+                    <button class="calc-button mode-toggle" onclick="toggleMode()">123</button>
+                    <button class="calc-button equals" onclick="searchWikipediaFromDisplay()">Wiki</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wikipedia Section -->
+        <div class="wikipedia-container flex flex-col space-y-4">
+            <h2 class="text-xl font-bold text-gray-100">Wikipedia</h2>
+            <div id="wiki-result" class="text-sm text-gray-300">
+                <p>Search for a scientific term to learn more.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const numKeypad = document.getElementById('number-keypad');
+        const alphaKeypad = document.getElementById('alpha-keypad');
+        let currentExpression = '';
+        let isAlphaMode = false;
+
+        function appendToDisplay(value) {
+            if (currentExpression === '0' && !'0123456789.() '.includes(value)) {
+                currentExpression = '';
+            }
+            if (currentExpression.startsWith('0') && currentExpression.length > 1 && !currentExpression.includes('.')) {
+                currentExpression = currentExpression.substring(1);
+            }
+            currentExpression += value;
+            display.textContent = currentExpression;
+        }
+
+        function clearDisplay() {
+            currentExpression = '';
+            display.textContent = '0';
+        }
+
+        function backspace() {
+            if (currentExpression.length > 0) {
+                currentExpression = currentExpression.slice(0, -1);
+                display.textContent = currentExpression.length > 0 ? currentExpression : '0';
+            }
+        }
+
+        function calculate() {
+            if (isAlphaMode) {
+                // In alpha mode, equals button triggers a search
+                searchWikipediaFromDisplay();
+                return;
+            }
+            try {
+                // Sanitize input to prevent code injection
+                const sanitizedExpression = currentExpression.replace(/[^-()\d/*+.]/g, '');
+                let result = eval(sanitizedExpression);
+                if (Number.isFinite(result)) {
+                    currentExpression = String(result);
+                    display.textContent = currentExpression;
+                } else {
+                    display.textContent = 'Error';
+                    currentExpression = '';
+                }
+            } catch (error) {
+                display.textContent = 'Error';
+                currentExpression = '';
+                console.error('Calculation error:', error);
+            }
+        }
+        
+        function searchWikipediaFromDisplay() {
+            const query = display.textContent;
+            searchWikipedia(query);
+        }
+
+        async function searchWikipedia(query) {
+            const resultDiv = document.getElementById('wiki-result');
+            resultDiv.innerHTML = '<p>Searching...</p>';
+            if (query.trim() === '') {
+                resultDiv.innerHTML = '<p>Please enter a term to search.</p>';
+                return;
+            }
+
+            const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                const results = data.query.search;
+                if (results.length > 0) {
+                    const firstResult = results[0];
+                    const pageTitle = firstResult.title;
+                    const snippet = firstResult.snippet;
+                    const fullUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}`;
+                    
+                    resultDiv.innerHTML = `
+                        <h3 class="text-lg font-semibold text-gray-100">${pageTitle}</h3>
+                        <p class="mt-2">${snippet}...</p>
+                        <a href="${fullUrl}" target="_blank" class="text-blue-400 hover:underline mt-2 inline-block">Read full article</a>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<p>No results found.</p>';
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="text-red-400">Error fetching data. Please try again.</p>';
+                console.error('Wikipedia search error:', error);
+            }
+        }
+
+        function toggleMode() {
+            isAlphaMode = !isAlphaMode;
+            if (isAlphaMode) {
+                numKeypad.classList.add('hidden');
+                alphaKeypad.classList.remove('hidden');
+                display.textContent = '';
+                currentExpression = '';
+            } else {
+                numKeypad.classList.remove('hidden');
+                alphaKeypad.classList.add('hidden');
+                display.textContent = '0';
+                currentExpression = '';
+            }
+        }
+    </script>
+</body>
+</html>
